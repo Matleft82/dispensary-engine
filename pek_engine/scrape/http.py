@@ -32,18 +32,44 @@ _DEFAULT_HEADERS = {
 
 
 class HttpClient:
-    """Thin GET/POST wrapper returning parsed JSON or raw text."""
+    """Thin GET/POST wrapper returning parsed JSON or raw text.
 
-    def __init__(self, impersonate: str = "chrome124", timeout: int = 30,
+    Uses a *persistent* session so cookies (e.g. Cloudflare clearance from a
+    `warm()` call) carry across requests — required by platforms like Dutchie.
+    """
+
+    def __init__(self, impersonate: str = "chrome", timeout: int = 60,
                  retries: int = 2, throttle: float = 0.2) -> None:
         self.impersonate = impersonate
         self.timeout = timeout
         self.retries = retries
         self.throttle = throttle
+        self._session = None
+        self._opener = None  # urllib fallback opener with a cookie jar
 
     @property
     def backend(self) -> str:
         return "curl_cffi" if _HAS_CURL else "urllib"
+
+    def _curl_session(self):
+        if self._session is None:
+            self._session = _cr.Session(impersonate=self.impersonate)
+        return self._session
+
+    def _urllib_opener(self):
+        if self._opener is None:
+            import http.cookiejar
+            jar = http.cookiejar.CookieJar()
+            self._opener = urllib.request.build_opener(
+                urllib.request.HTTPCookieProcessor(jar))
+        return self._opener
+
+    def warm(self, url: str, headers=None) -> None:
+        """Visit a page to collect cookies (Cloudflare clearance) before APIs."""
+        try:
+            self._request("GET", url, headers=headers)
+        except Exception:
+            pass
 
     def _request(self, method: str, url: str, params=None, headers=None,
                  json_body=None) -> tuple[int, str]:
@@ -52,22 +78,22 @@ class HttpClient:
         for attempt in range(self.retries + 1):
             try:
                 if _HAS_CURL:
-                    fn = _cr.get if method == "GET" else _cr.post
+                    sess = self._curl_session()
+                    fn = sess.get if method == "GET" else sess.post
                     resp = fn(url, params=params, headers=headers,
-                              json=json_body, impersonate=self.impersonate,
-                              timeout=self.timeout)
+                              json=json_body, timeout=self.timeout)
                     return resp.status_code, resp.text
-                # urllib fallback
+                # urllib fallback (persistent cookie jar)
                 full = url
                 if params:
-                    full = url + "?" + urllib.parse.urlencode(params)
+                    full = url + "?" + urllib.parse.urlencode(params, doseq=True)
                 data = None
                 if json_body is not None:
                     data = json.dumps(json_body).encode("utf-8")
                     headers = {**headers, "Content-Type": "application/json"}
                 req = urllib.request.Request(full, data=data, headers=headers,
                                              method=method)
-                with urllib.request.urlopen(req, timeout=self.timeout) as r:
+                with self._urllib_opener().open(req, timeout=self.timeout) as r:
                     return r.status, r.read().decode("utf-8", "replace")
             except Exception as exc:  # network error / anti-bot block
                 last_exc = exc
@@ -110,6 +136,9 @@ class FixtureClient:
     def __init__(self, mapping: dict[str, Any]) -> None:
         self._mapping = mapping
         self._cursor: dict[str, int] = {}
+
+    def warm(self, url: str, headers=None) -> None:
+        return None
 
     @classmethod
     def from_dir(cls, path: str | Path) -> "FixtureClient":

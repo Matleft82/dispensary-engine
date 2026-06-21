@@ -18,10 +18,10 @@ def test_dutchie_adapter_maps_canonical_schema():
     pages = [{
         "__paged__": True,
         "data": {"filteredProducts": {"products": [{
-            "id": "abc", "Name": "Blue Dream | Live Resin | Aio | 1g",
-            "brand": {"name": "Stiiizy"}, "type": "Vaporizers",
-            "strainType": "Hybrid", "THCContent": {"formatted": "85%"},
-            "Options": ["1g"], "Prices": [45], "Image": "http://img/x"}],
+            "_id": "abc", "Name": "Blue Dream | Live Resin | Aio | 1g",
+            "brandName": "Stiiizy", "type": "Vaporizers", "subcategory": "Cart",
+            "strainType": "Hybrid", "THCContent": {"range": [85], "unit": "PERCENTAGE"},
+            "Options": ["1g"], "recPrices": [45], "Image": "http://img/x"}],
             "queryInfo": {"totalPages": 1}}},
     }]
     rows = adapters.fetch_dutchie(_entry(), FixtureClient({"graphql": pages}), "b1")
@@ -31,9 +31,28 @@ def test_dutchie_adapter_maps_canonical_schema():
     assert r["brand"] == "Stiiizy"
     assert r["weight"] == "1g"
     assert r["price"] == "45"
+    assert r["thc"] == "85"
     assert r["product_url"].endswith("/products/abc")
     assert r["platform"] == "Dutchie"
     assert r["batch_id"] == "b1"
+
+
+def test_weedmaps_adapter_extracts_scalar_price():
+    pages = [
+        {"__paged__": True, "data": {"menu_items": [{
+            "id": "w1", "name": "STIIIZY Biscotti 1g",
+            "brand_endorsement": {"brand_name": "STIIIZY"},
+            "category": {"name": "Vaporizers"},
+            "price": {"price": 45.0, "label": "each"}}]},
+            "meta": {"total_menu_items": 1}},
+        {"__paged__": True, "data": {"menu_items": []}, "meta": {"total_menu_items": 1}},
+    ]
+    e = _entry(platform="weedmaps", ext="ether", raw="WeedMaps",
+               menu="https://etherbuffalo.wm.store/")
+    rows = adapters.fetch_weedmaps(e, FixtureClient({"menu_items": pages}), "b")
+    assert len(rows) == 1
+    assert rows[0]["brand"] == "STIIIZY"
+    assert rows[0]["price"] == "45.0"
 
 
 def test_carrot_requires_host_key_index():
