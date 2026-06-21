@@ -133,11 +133,30 @@ the hard gates.
 `product_url` (new) is built from the menu URL + product id where the platform
 exposes it, giving the "click out to buy" link the price-compare view needs.
 
-### 4.4 Scheduling
-- Cron / scheduler triggers full harvest **N× per day** (configurable; default 3).
+### 4.4 Scheduling (implemented)
+- `pek_engine/schedule.py` drives the cadence. One **tick** = the full incremental
+  cycle: `scrape (incremental) -> normalize (incremental) -> archive (+ optional
+  Postgres)`. The first tick (no prior outputs) does a full normalize to seed the
+  baseline; every later tick re-normalizes only the delta.
+- Two run modes:
+  - `run.py schedule --times-per-day N` — long-lived loop; interval = 24h/N with
+    optional `--jitter` so all stores aren't hit at the same instant each cycle.
+  - `run.py schedule --once` — a single tick, for wiring to system cron, e.g.
+    `0 */8 * * *  cd /srv/engine && python run.py schedule --once --dsn $PG_DSN`.
+- A tick failure is logged (structured JSON) and the loop continues; it never
+  kills the scheduler.
 - Each harvest is a **batch** (`batch_id`) so price history is queryable over time.
-- Stores are harvested concurrently with a bounded worker pool + per-platform
-  throttle. A store failure is logged and skipped, never aborts the batch.
+- Future: stores harvested concurrently with a bounded worker pool + per-platform
+  throttle (currently sequential; per-store failures already skip, never abort).
+
+### 4.4c Postgres sink for the archive (implemented)
+`pek_engine/analytics_pg.py` (`ArchiveDB`) loads the compacted archive into a
+database via SQLAlchemy Core (same SQL runs on Postgres and SQLite). Tables mirror
+the tiers, keyed on canonical MCP id with prices in integer cents:
+`current_state`, `price_events` (append-only, deduped by a content hash so
+re-running a tick is idempotent), `daily_rollup`, `monthly_rollup`. Enable with
+`--dsn postgres://…` on `archive` or `schedule`; the dependency is lazy so the
+engine still runs file-only without it.
 
 ### 4.4a Incremental harvest (delta engine)
 The menu APIs expose no universal "changed-since" feed, so a pull still asks each
@@ -309,10 +328,11 @@ schema maps directly to the Postgres DDL for production.
   runner, sinks, fixture mode. Scrape → normalize is one continuous pipeline.
 - **Phase 3 — Product agent (THIS PR):** decision contract, heuristic + LLM
   backends, write-back into alias/rejected tables.
-- **Phase 4 — Incremental harvest + archival (THIS PR):** delta engine
-  (added/changed/removed/unchanged), incremental normalize, append-only price
-  events, tiered daily/monthly rollups + retention compaction. Remaining for a
-  later pass: Postgres sink for the rollups + a cron scheduler.
+- **Phase 4 — Incremental harvest + archival + scheduling (THIS PR):** delta
+  engine (added/changed/removed/unchanged), incremental normalize, append-only
+  price events, tiered daily/monthly rollups + retention compaction, a Postgres
+  sink for the archive, and a scheduler driving the N×/day cadence (loop or cron
+  `--once`).
 - **Phase 5 — Search surface / API + UI:** query → MCP → side-by-side compare →
   buy link; embedding search; distance/stock.
 

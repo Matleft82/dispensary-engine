@@ -61,11 +61,32 @@ def _cmd_archive(args) -> None:
         analytics.write_jsonl(Path(args.archive_dir) / "current_state.jsonl",
                               analytics.build_current_state(args.out))
     dst = Path(args.archive_dir) / "price_history.jsonl"
-    if Path(args.price_history).resolve() != dst.resolve():
-        shutil.copy(args.price_history, dst)
+    src = Path(args.price_history)
+    if src.exists() and src.resolve() != dst.resolve():
+        shutil.copy(src, dst)
+    elif not dst.exists():
+        dst.write_text("")
     stats = analytics.compact(args.archive_dir, recent_days=args.recent_days,
                               daily_months=args.daily_months)
+    if getattr(args, "dsn", None):
+        from pek_engine.analytics_pg import ArchiveDB
+        stats["postgres"] = ArchiveDB(args.dsn).sync_from_dir(args.archive_dir)
     print(json.dumps(stats, indent=2))
+
+
+def _cmd_schedule(args) -> None:
+    from pek_engine.schedule import ScheduleConfig, run_scheduler
+    cfg = ScheduleConfig(
+        dispensaries=args.dispensaries, brands=args.brands, raw_out=args.raw,
+        out_dir=args.out, state_dir=args.state_dir, delta_json=args.delta,
+        archive_dir=args.archive_dir, price_history=args.price_history,
+        platforms=set(args.platforms.split(",")) if args.platforms else None,
+        limit=args.limit, dsn=args.dsn, recent_days=args.recent_days,
+        daily_months=args.daily_months, jitter_seconds=args.jitter)
+    max_ticks = 1 if args.once else args.max_ticks
+    summaries = run_scheduler(cfg, times_per_day=args.times_per_day,
+                              max_ticks=max_ticks)
+    print(json.dumps({"ticks": len(summaries)}, indent=2))
 
 
 def _cmd_agent(args) -> None:
@@ -124,7 +145,30 @@ def main() -> None:
     ar.add_argument("--price-history", default="outputs/price_history.jsonl")
     ar.add_argument("--recent-days", type=int, default=90)
     ar.add_argument("--daily-months", type=int, default=13)
+    ar.add_argument("--dsn", default=None,
+                    help="Postgres DSN to load rollups into (optional)")
     ar.set_defaults(func=_cmd_archive)
+
+    sc = sub.add_parser("schedule",
+                        help="drive N×/day scrape->normalize->archive cadence")
+    sc.add_argument("--dispensaries", default="data/dispensaries.csv")
+    sc.add_argument("--brands", default="data/brand_aliases_seed.csv")
+    sc.add_argument("--raw", default="data/raw_listings.json")
+    sc.add_argument("--out", default="outputs")
+    sc.add_argument("--state-dir", default="state")
+    sc.add_argument("--delta", default="data/delta.json")
+    sc.add_argument("--archive-dir", default="archive")
+    sc.add_argument("--price-history", default="outputs/price_history.jsonl")
+    sc.add_argument("--platforms", default=None)
+    sc.add_argument("--limit", type=int, default=None)
+    sc.add_argument("--dsn", default=None, help="Postgres DSN (optional)")
+    sc.add_argument("--times-per-day", type=int, default=3)
+    sc.add_argument("--once", action="store_true", help="run a single tick (for cron)")
+    sc.add_argument("--max-ticks", type=int, default=None)
+    sc.add_argument("--jitter", type=int, default=0, help="max random extra seconds")
+    sc.add_argument("--recent-days", type=int, default=90)
+    sc.add_argument("--daily-months", type=int, default=13)
+    sc.set_defaults(func=_cmd_schedule)
 
     # default to `normalize` for backward compatibility
     argv = sys.argv[1:]

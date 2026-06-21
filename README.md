@@ -83,6 +83,29 @@ keeps the raw event log bounded by folding old events into daily then monthly
 rollups, so archival storage stays roughly constant instead of growing linearly
 with pulls. See `docs/PRD.md` §4.4a–4.4b.
 
+### Scheduling the N×/day cadence + Postgres archive
+
+`schedule` runs the whole cycle (scrape → normalize → archive) on a cadence. The
+first tick seeds a full normalize; every later tick only processes the delta.
+Pass `--dsn` (on `archive` or `schedule`) to load the archive tiers into Postgres
+— `current_state`, `price_events` (append-only, deduped → idempotent),
+`daily_rollup`, `monthly_rollup`, keyed on MCP id with prices in cents. Requires
+the `db` extra (`pip install -e ".[db]"`); the same SQL runs on SQLite for tests.
+
+```bash
+# Long-lived loop: 3 harvests/day, jittered, persisting to Postgres
+python run.py schedule --times-per-day 3 --jitter 600 \
+  --dsn postgresql+psycopg2://user:pass@host/dbname
+
+# Single tick — wire to system cron (every 8h):
+#   0 */8 * * *  cd /srv/engine && python run.py schedule --once --dsn $PG_DSN
+python run.py schedule --once --platforms dutchie,weedmaps \
+  --dsn postgresql+psycopg2://user:pass@host/dbname
+
+# Or just load an already-compacted archive into Postgres:
+python run.py archive --out outputs --archive-dir archive --dsn $PG_DSN
+```
+
 ### Scraper engine (`pek_engine/scrape/`)
 
 Registry-driven (`dispensaries.csv`) multi-platform harvesting. Adapters cover
