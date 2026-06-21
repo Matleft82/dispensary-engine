@@ -54,6 +54,35 @@ python run.py normalize --raw data/raw_listings.json \
 python run.py agent --out outputs --data data --apply
 ```
 
+### Incremental pulls (don't re-download/re-process unchanged products)
+
+Scheduled re-pulls should only act on what changed. The delta engine fingerprints
+every product, diffs against the last pull's per-dispensary snapshot, and routes
+only the changes downstream (unchanged products are never re-normalized).
+
+```bash
+# Incremental harvest: writes the current snapshot + a delta (added/changed/removed)
+# + appends every price move to an append-only event log.
+python run.py scrape --incremental --state-dir state \
+  --delta data/delta.json --price-history outputs/price_history.jsonl \
+  --out data/raw_listings.json
+
+# Incremental normalize: re-normalizes only the delta, carries the rest forward.
+python run.py normalize --incremental --prev outputs \
+  --delta data/delta.json --out outputs
+
+# Archive for time-series analytics: map events -> canonical MCP, build
+# current_state, and compact old events into daily/monthly OHLC rollups.
+python run.py archive --out outputs --archive-dir archive \
+  --price-history outputs/price_history.jsonl --recent-days 90 --daily-months 13
+```
+
+A price is a step function, so the change-event log is a **lossless** record of
+price-over-time at a tiny fraction of the storage of full snapshots. Compaction
+keeps the raw event log bounded by folding old events into daily then monthly
+rollups, so archival storage stays roughly constant instead of growing linearly
+with pulls. See `docs/PRD.md` §4.4a–4.4b.
+
 ### Scraper engine (`pek_engine/scrape/`)
 
 Registry-driven (`dispensaries.csv`) multi-platform harvesting. Adapters cover

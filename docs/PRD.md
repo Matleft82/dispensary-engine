@@ -139,6 +139,39 @@ exposes it, giving the "click out to buy" link the price-compare view needs.
 - Stores are harvested concurrently with a bounded worker pool + per-platform
   throttle. A store failure is logged and skipped, never aborts the batch.
 
+### 4.4a Incremental harvest (delta engine)
+The menu APIs expose no universal "changed-since" feed, so a pull still asks each
+store for its current menu. But everything downstream is incremental:
+- Each product is reduced to a **content fingerprint** (hash of the meaningful
+  fields, excluding volatile bookkeeping). Comparing to the per-dispensary
+  snapshot from the last pull classifies every product as
+  **added / changed / removed / unchanged**.
+- Only **added + changed** rows flow downstream to re-normalization; **removed**
+  product ids are recorded (delisted / out of stock); **unchanged** rows are
+  never re-normalized or rewritten — their MCP links and price rows carry forward.
+- Every price move appends one row to an append-only **price-event log**.
+- CLI: `scrape --incremental --state-dir state --delta delta.json
+  --price-history price_history.jsonl`; then `normalize --incremental --prev
+  <last_out> --delta delta.json`.
+- Where a platform supports an updated/sort cursor, pagination can short-circuit
+  once it reaches unchanged older pages (Dutchie sort hooks present).
+
+### 4.4b Time-series archival (analytics without bloat)
+Storing full snapshots (≈25k products × N pulls/day × 365) is wasteful and
+mostly redundant. Because **a price is a step function**, the entire history is
+reconstructable from just the change-points, so we keep tiered, compacting data:
+- **Tier 0 — current_state:** one row per live product (overwritten each pull).
+- **Tier 1 — events:** append-only, only on change. Lossless for price trends.
+  Full granularity retained ~90 days.
+- **Tier 2 — daily rollup:** OHLC (open/high/low/close/avg, # changes) per
+  `(mcp_id, dispensary, day)` — only days with a change. Kept ~13 months.
+- **Tier 3 — monthly rollup:** per `(mcp_id, dispensary, month)`; kept for years.
+- **Compaction** (`archive` subcommand) folds events older than the retention
+  window into the daily rollup (and daily into monthly), so storage stays roughly
+  constant rather than growing linearly with pulls.
+- Analytics key off the **canonical MCP id** (not per-store product GUIDs, which
+  explode cardinality); prices stored as integer **cents**.
+
 ### 4.5 Non-functional
 - Anti-bot: `curl_cffi` with `impersonate="chrome*"`; rotate UA/headers per
   platform; backoff on 429/403.
@@ -276,8 +309,10 @@ schema maps directly to the Postgres DDL for production.
   runner, sinks, fixture mode. Scrape → normalize is one continuous pipeline.
 - **Phase 3 — Product agent (THIS PR):** decision contract, heuristic + LLM
   backends, write-back into alias/rejected tables.
-- **Phase 4 — Persistence & scheduling:** Postgres, scheduled multi-daily
-  harvests, price history.
+- **Phase 4 — Incremental harvest + archival (THIS PR):** delta engine
+  (added/changed/removed/unchanged), incremental normalize, append-only price
+  events, tiered daily/monthly rollups + retention compaction. Remaining for a
+  later pass: Postgres sink for the rollups + a cron scheduler.
 - **Phase 5 — Search surface / API + UI:** query → MCP → side-by-side compare →
   buy link; embedding search; distance/stock.
 

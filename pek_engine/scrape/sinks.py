@@ -22,6 +22,28 @@ class JsonSink:
         return len(self._rows)
 
 
+class DeltaSink:
+    """Write only the incremental changes: added/changed rows + removed ids."""
+
+    def __init__(self, path: str | Path) -> None:
+        self.path = Path(path)
+        self._rows: list[dict] = []
+        self._removed: list[str] = []
+
+    def write(self, rows: list[dict]) -> None:
+        self._rows.extend(rows)
+
+    def add_removed(self, product_ids: list[str], dispensary_id: str = "") -> None:
+        self._removed.extend({"dispensary_id": dispensary_id, "product_id": pid}
+                             for pid in product_ids)
+
+    def close(self) -> dict:
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        payload = {"changed_listings": self._rows, "removed_product_ids": self._removed}
+        self.path.write_text(json.dumps(payload, ensure_ascii=False, indent=0))
+        return {"changed": len(self._rows), "removed": len(self._removed)}
+
+
 class PostgresSink:
     """Upsert rows into a ``dispensary_products`` table (requires sqlalchemy)."""
 

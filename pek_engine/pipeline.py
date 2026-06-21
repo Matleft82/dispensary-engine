@@ -10,7 +10,8 @@ from pathlib import Path
 
 from . import matching
 from .brand import BrandResolver
-from .ingest import load_dispensary_platforms, load_raw_listings
+from .ingest import (load_dispensary_platforms, load_raw_listings, raw_id,
+                     records_to_raw)
 from .models import ELIGIBLE, NormalizedDPL, PriceIndexRow
 from .normalize import normalize_dpl
 
@@ -36,6 +37,50 @@ def run(raw_json: str, brand_csv: str, dispensary_csv: str,
     resolver = BrandResolver.from_seed_csv(brand_csv)
 
     normalized: list[NormalizedDPL] = [normalize_dpl(r, resolver) for r in raws]
+    return _finalize(normalized, resolver, batch_id, now, out)
+
+
+def run_incremental(prev_out_dir: str, delta_json: str, brand_csv: str,
+                    dispensary_csv: str, out_dir: str,
+                    batch_id: str | None = None) -> dict:
+    """Update the previous batch using only the harvested delta: re-normalize
+    added/changed listings, drop removed ones, carry unchanged ones forward, then
+    rebuild MCPs + price index. Unchanged listings are never re-normalized."""
+    batch_id = batch_id or f"batch_{date.today().isoformat()}_{uuid.uuid4().hex[:6]}"
+    out = Path(out_dir)
+    out.mkdir(parents=True, exist_ok=True)
+    now = _now_iso()
+
+    platforms = load_dispensary_platforms(dispensary_csv)
+    resolver = BrandResolver.from_seed_csv(brand_csv)
+
+    prev_path = Path(prev_out_dir) / "normalized_dpls.json"
+    prev = json.loads(prev_path.read_text()) if prev_path.exists() else []
+    by_id: dict[str, NormalizedDPL] = {
+        d["raw_dpl_id"]: NormalizedDPL.from_dict(d) for d in prev}
+
+    delta = json.loads(Path(delta_json).read_text())
+    changed_rows = delta.get("changed_listings", [])
+    removed = delta.get("removed_product_ids", [])
+
+    for rm in removed:
+        disp = rm.get("dispensary_id", "") if isinstance(rm, dict) else ""
+        pid = rm.get("product_id", "") if isinstance(rm, dict) else str(rm)
+        by_id.pop(raw_id(disp, pid), None)
+
+    raws = records_to_raw(changed_rows, batch_id, platforms)
+    for r in raws:
+        by_id[r.raw_dpl_id] = normalize_dpl(r, resolver)
+
+    normalized = list(by_id.values())
+    summary = _finalize(normalized, resolver, batch_id, now, out)
+    summary["incremental"] = {"re_normalized": len(raws), "removed": len(removed),
+                              "carried_forward": len(prev) - len(removed)}
+    return summary
+
+
+def _finalize(normalized: list[NormalizedDPL], resolver: BrandResolver,
+              batch_id: str, now: str, out: Path) -> dict:
     eligible = [d for d in normalized if d.comparison_status == ELIGIBLE
                 and d.proposed_pek]
 

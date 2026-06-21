@@ -4,6 +4,11 @@ __pycache__/
 *.egg-info/
 .venv/
 outputs/
+# incremental harvest + archival artifacts (generated each pull)
+state/
+archive/
+data/delta*.json
+*.jsonl
 # agent-applied tables (generated; seed tables are committed)
 data/*_approved.csv
 data/rejected_matches_memory.jsonl

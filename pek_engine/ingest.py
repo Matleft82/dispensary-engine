@@ -35,10 +35,14 @@ def load_dispensary_platforms(csv_path: str | Path) -> dict[str, str]:
     return out
 
 
-def _raw_id(dispensary_id: str, product_id: str) -> str:
+def raw_id(dispensary_id: str, product_id: str) -> str:
     base = f"{dispensary_id}:{product_id}"
     digest = hashlib.sha1(base.encode("utf-8")).hexdigest()[:16]
     return f"raw_{digest}"
+
+
+# backwards-compatible alias
+_raw_id = raw_id
 
 
 def load_raw_listings(
@@ -47,10 +51,18 @@ def load_raw_listings(
     platform_map: dict[str, str] | None = None,
 ) -> list[RawDPL]:
     """Load the source listings JSON into RawDPL records, preserving payload."""
-    platform_map = platform_map or {}
     with open(json_path, encoding="utf-8") as fh:
         records = json.load(fh)
+    return records_to_raw(records, batch_id, platform_map)
 
+
+def records_to_raw(
+    records: list[dict],
+    batch_id: str,
+    platform_map: dict[str, str] | None = None,
+) -> list[RawDPL]:
+    """Build RawDPL records from in-memory listing dicts, preserving payload."""
+    platform_map = platform_map or {}
     out: list[RawDPL] = []
     for rec in records:
         dispensary_id = str(rec.get("dispensary_id", "")).strip()
