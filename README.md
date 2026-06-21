@@ -1,4 +1,4 @@
-# Dispensary PEK / MCP Engine
+# Dispensary Price-Comparison Engine
 
 Turns messy dispensary menu listings into clean, comparable **canonical products**
 so the same real-world product can be priced side-by-side across dispensaries.
@@ -6,6 +6,14 @@ so the same real-world product can be priced side-by-side across dispensaries.
 Implements **Normalization Foundation v1**: *normalize aggressively, match
 conservatively*. A missed match is better than a false match. Source data is
 never mutated and missing facts are never fabricated.
+
+Three subsystems live in `pek_engine/`:
+- **`scrape/`** — multi-platform menu harvesters → raw listings.
+- normalization core (root modules) — raw listing → PEK → MCP → price index.
+- **`agent/`** — human-in-the-loop adjudicator that turns uncertain matches into
+  approved brand/product aliases + rejections feeding the core next batch.
+
+The full product spec is in [`docs/PRD.md`](docs/PRD.md).
 
 ## Core concepts
 
@@ -30,13 +38,46 @@ See [`docs/`](docs) for the full spec and design notes.
 
 ## Run
 
+The CLI has three subcommands (`normalize` is the default for backward compat):
+
 ```bash
-python run.py \
-  --raw data/raw_listings.json \
+# 1. Harvest live menus -> raw listings (needs the `scrape` extra for anti-bot)
+python run.py scrape --dispensaries data/dispensaries.csv --out data/raw_listings.json
+#    optional: --platforms dutchie,carrot   --limit 5
+
+# 2. Normalize raw listings -> MCPs + price comparison index
+python run.py normalize --raw data/raw_listings.json \
   --brands data/brand_aliases_seed.csv \
-  --dispensaries data/dispensaries.csv \
-  --out outputs
+  --dispensaries data/dispensaries.csv --out outputs
+
+# 3. Adjudicate uncertain matches -> agent decisions (+ optionally apply aliases)
+python run.py agent --out outputs --data data --apply
 ```
+
+### Scraper engine (`pek_engine/scrape/`)
+
+Registry-driven (`dispensaries.csv`) multi-platform harvesting. Adapters cover
+**Dutchie, Carrot, Jane, Blaze, Weedmaps, AIQ/Dispense, Flowhub** (Proteus420 /
+KushMart / Treez are HTML scrapers, stubbed behind the same interface). Each
+adapter emits the exact raw-listing schema the normalizer ingests, so
+scrape→normalize is one pipeline. Network I/O goes through an injectable client
+(`HttpClient` with `curl_cffi` impersonation, `urllib` fallback, or a
+`FixtureClient` for offline tests). Sinks: JSON file (default) or Postgres.
+
+> Live harvesting depends on the host IP not being anti-bot-blocked and on the
+> registry's `Platform Store ID`s being filled (several are blank). Install
+> `pip install -e .[scrape]` for browser impersonation. Adapter parsing is
+> covered by offline fixture tests regardless of network access.
+
+### Product agent (`pek_engine/agent/`)
+
+Adjudicates `review_queue` + alias suggestions into structured `AgentDecision`s
+(approve/reject alias, fix-field, reject-merge) with rationale + evidence.
+**It never overrides a hard gate** — a conflict can only be rejected. Decisions
+default to requiring human approval; only high-confidence aliases auto-apply and
+are written back to the editable alias / rejected-match tables. Backends are
+pluggable: `HeuristicBackend` (offline default) and `LLMBackend` (optional,
+takes a user-supplied `llm_fn`, falls back to heuristic on any failure).
 
 Outputs (in `outputs/`, mirroring the spec's tables):
 
@@ -85,7 +126,10 @@ disposable, descriptor words must not split product identity, etc.).
 
 ## Roadmap
 
-1. **Normalization core** (this package) ✅
-2. Scrapers per platform (Dutchie, Carrot, AIQ, Jane, …) feeding the raw DPL table
-3. Persistent store (Postgres) using the spec DDL + human review UI
-4. Search + comparison web app
+1. **Normalization core** ✅
+2. **Scraper engine** (multi-platform adapters, registry, sinks) ✅
+3. **Product agent** (adjudication loop + write-back to alias tables) ✅
+4. Persistence (Postgres) + scheduled multi-daily harvests + price history
+5. Search + side-by-side comparison web app (free-text → MCP → ranked dispensaries → buy link)
+
+See [`docs/PRD.md`](docs/PRD.md) for the full phased plan.
