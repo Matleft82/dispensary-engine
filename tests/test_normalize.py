@@ -107,6 +107,25 @@ def test_accessory_excluded():
     assert n.proposed_pek is None
 
 
+def test_accent_folding_keeps_identity():
+    # The 'Rosé' -> 'Ros' truncation bug: accents must fold, not drop letters.
+    n = normalize_dpl(_raw("Ayrloom Rosé 10mg THC Beverage", brand="Off Hours",
+                           category="Edibles", thc="10", thc_unit="MILLIGRAMS"),
+                      _resolver())
+    assert "rose" in n.normalized_product_name.lower()
+    n2 = normalize_dpl(_raw("Piña Colada Gummies 100mg", brand="Off Hours",
+                            category="Edibles", thc="100", thc_unit="MILLIGRAMS"),
+                       _resolver())
+    assert "pina colada" in n2.normalized_product_name.lower()
+
+
+def test_ampersand_preserved_as_and():
+    n = normalize_dpl(_raw("Off Hours Half & Half 100mg Gummies", brand="Off Hours",
+                           category="Edibles", thc="100", thc_unit="MILLIGRAMS"),
+                      _resolver())
+    assert "half and half" in n.normalized_product_name.lower()
+
+
 def test_descriptor_does_not_split_identity():
     # The #hash defect: a strain-type descriptor must not change identity.
     a = normalize_dpl(_raw("#Hash Angie Sativa/Hybrid Wax Budder 1g",

@@ -11,7 +11,7 @@ from . import text_clean
 
 def _brand_key(name: str) -> str:
     """Normalized brand key: lowercase, strip punctuation/apostrophes/space."""
-    s = text_clean.normalize_unicode(name or "").lower()
+    s = text_clean.fold_accents(text_clean.normalize_unicode(name or "")).lower()
     s = s.replace("'", "")
     s = re.sub(r"[^a-z0-9]+", " ", s)
     return re.sub(r"\s+", " ", s).strip()
@@ -29,7 +29,10 @@ class BrandResolver:
         self._alias: dict[str, tuple[str, str]] = {}
         # set of canonical keys (for title-prefix detection)
         self._canonical_keys: set[str] = set()
+        self._canonical_names: set[str] = set()
         self.suggestions: dict[str, dict] = {}
+        self._embedder = None
+        self._canon_vecs: list[tuple[str, dict]] | None = None
 
     @classmethod
     def from_seed_csv(cls, csv_path: str | Path) -> "BrandResolver":
@@ -55,6 +58,7 @@ class BrandResolver:
         brand_id = "brand_" + _brand_key(canonical).replace(" ", "_")
         self._alias[key] = (canonical, brand_id)
         self._canonical_keys.add(_brand_key(canonical))
+        self._canonical_names.add(canonical)
 
     def resolve(self, source_brand: str | None) -> dict:
         """Resolve a raw brand string.
@@ -83,21 +87,44 @@ class BrandResolver:
 
         # Unknown brand: keep a cleaned display form, flag as a suggestion.
         cleaned = _display(raw)
-        self.suggestions.setdefault(key, {
-            "raw_brand_value": raw,
-            "normalized_raw_value": key,
-            "suggested_canonical": cleaned,
-            "approval_status": "needs_review",
-            "alias_type": "new_brand",
-            "count": 0,
-            "example_titles": [],
-        })
+        if key not in self.suggestions:
+            nearest, score = self._closest_known(cleaned)
+            self.suggestions[key] = {
+                "raw_brand_value": raw,
+                "normalized_raw_value": key,
+                "suggested_canonical": cleaned,
+                "closest_approved_brand": nearest,
+                "closest_approved_similarity": score,
+                "approval_status": "needs_review",
+                "alias_type": "new_brand",
+                "count": 0,
+                "example_titles": [],
+            }
         self.suggestions[key]["count"] += 1
         return {
             "normalized_brand": cleaned,
             "brand_id": "brand_" + key.replace(" ", "_"),
             "brand_confidence": 0.6, "alias_type": "new_brand", "known": False,
         }
+
+    def _closest_known(self, name: str) -> tuple[str | None, float | None]:
+        """Nearest approved brand by char-ngram embedding (suggestion only)."""
+        from .embeddings import CharNgramEmbedder
+        if self._embedder is None:
+            self._embedder = CharNgramEmbedder()
+            self._canon_vecs = [(c, self._embedder.embed(c))
+                                for c in self._canonical_names]
+        if not self._canon_vecs:
+            return None, None
+        qv = self._embedder.embed(name)
+        best, best_sim = None, 0.0
+        for canon, cv in self._canon_vecs:
+            sim = self._embedder.similarity(qv, cv)
+            if sim > best_sim:
+                best, best_sim = canon, sim
+        if best_sim >= 0.6:
+            return best, round(best_sim, 3)
+        return None, None
 
     def lookup_known(self, candidate: str) -> tuple[str, str] | None:
         """Return (canonical, brand_id) if candidate matches a known brand."""

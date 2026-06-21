@@ -9,10 +9,10 @@ Strategy (spec sections 19-24):
 
 from __future__ import annotations
 
-import difflib
 import uuid
 from collections import defaultdict
 
+from . import embeddings
 from . import mcp as mcp_mod
 from .models import (
     DataQualityFlag,
@@ -159,26 +159,42 @@ def analyze_near_matches(mcps: list[MCP], rep_dpl: dict[str, NormalizedDPL],
                         f"Same brand/category/product but {issue} between PEKs.",
                         action, batch_id))
 
-    # fuzzy product-name aliases within (brand, category, size, form)
-    fuzzy: dict[tuple, list[MCP]] = defaultdict(list)
-    for m in mcps:
-        fuzzy[(tok(m.normalized_brand), m.normalized_category,
-               m.normalized_size or "", m.normalized_form or "")].append(m)
-    for key, group in fuzzy.items():
-        names = sorted({m.canonical_product_name for m in group if m.canonical_product_name})
-        for i in range(len(names)):
-            for j in range(i + 1, len(names)):
-                n1, n2 = names[i], names[j]
-                ratio = difflib.SequenceMatcher(None, tok(n1), tok(n2)).ratio()
-                if 0.82 <= ratio < 1.0:
-                    sid = tok(key[0]) + "|" + tok(n1) + "|" + tok(n2)
-                    alias_suggestions[sid] = {
-                        "brand": key[0], "category": key[1],
-                        "value_a": n1, "value_b": n2,
-                        "similarity": round(ratio, 3),
-                        "approval_status": "needs_review",
-                        "scope": "brand_specific",
-                    }
+    # Embeddings recall layer: surface close MCPs the exact-product bucket
+    # missed (typos, reorders, "Blueberry 2.0" vs "Blueberry #2"). Gated:
+    # every pair still passes through _classify_conflict, so a hard conflict
+    # (different size/extract/etc.) is NOT proposed as a merge.
+    seen_pairs: set[frozenset] = set()
+    for a, b, sim in embeddings.candidate_pairs(
+            mcps,
+            key_fn=lambda m: (tok(m.normalized_brand), m.normalized_category),
+            text_fn=lambda m: m.canonical_product_name or m.search_title,
+            threshold=0.80):
+        pair = frozenset((a.mcp_id, b.mcp_id))
+        if pair in seen_pairs:
+            continue
+        seen_pairs.add(pair)
+        verdict = _classify_conflict(a, b)
+        same_product = tok(a.canonical_product_name) == tok(b.canonical_product_name)
+        if verdict is not None and verdict[0] == "rejected":
+            # Embeddings think they're close, but a hard gate says no. Trust
+            # the gate; do not propose a merge.
+            continue
+        if same_product:
+            continue  # already handled by the exact-product bucket above
+        sid = tok(a.normalized_brand) + "|" + tok(a.canonical_product_name) \
+            + "|" + tok(b.canonical_product_name)
+        alias_suggestions[sid] = {
+            "brand": a.normalized_brand, "category": a.normalized_category,
+            "value_a": a.canonical_product_name,
+            "value_b": b.canonical_product_name,
+            "similarity": sim, "method": "char_ngram_embedding",
+            "approval_status": "needs_review", "scope": "brand_specific",
+        }
+        da, db = rep_dpl[a.mcp_id], rep_dpl[b.mcp_id]
+        reviews.append(_review(
+            "possible_product_alias", "low", [da, db], [a.mcp_id, b.mcp_id],
+            f"Embedding similarity {sim} between product names; possible alias.",
+            "confirm_or_reject_alias", batch_id))
 
     return reviews, rejected, alias_suggestions
 

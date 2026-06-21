@@ -26,6 +26,13 @@ def normalize_unicode(text: str) -> str:
     return text
 
 
+def fold_accents(text: str) -> str:
+    """Map accented Latin letters to ASCII for parsing (Rosé -> Rose, Piña ->
+    Pina). Used only for search/key tokens so display titles keep accents."""
+    decomposed = unicodedata.normalize("NFKD", text)
+    return "".join(c for c in decomposed if not unicodedata.combining(c))
+
+
 def display_title(raw_title: str) -> str:
     """Readable title: unicode-normalized, collapsed whitespace, kept case."""
     text = normalize_unicode(raw_title or "")
@@ -42,13 +49,14 @@ def strip_decorations(text: str) -> str:
 
 def search_title(raw_title: str, strip_noise: bool = True) -> str:
     """Lowercased, separator-cleaned title for parsing/extraction."""
-    text = normalize_unicode(raw_title or "").lower()
+    text = fold_accents(normalize_unicode(raw_title or "")).lower()
     # Replace the " l " pipe artifact first (needs surrounding spaces).
     text = re.sub(r"\s+l\s+", " | ", text)
     for sep in _SEPARATORS:
         text = text.replace(sep, " ")
     text = text.replace("|", " ")
     text = text.replace("'", "")
+    text = text.replace("&", " and ")
     text = re.sub(r"[^\w\s.:/-]", " ", text)
     text = re.sub(r"\s+", " ", text).strip()
     if strip_noise:
@@ -69,7 +77,7 @@ def segments(raw_title: str) -> list[str]:
 
 def normalize_key_token(text: str) -> str:
     """Collapse a string to a stable key token: lowercase alnum + underscores."""
-    text = normalize_unicode(text or "").lower()
+    text = fold_accents(normalize_unicode(text or "")).lower()
     text = text.replace("'", "")
     text = re.sub(r"[^a-z0-9]+", "_", text)
     return text.strip("_")
