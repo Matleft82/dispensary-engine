@@ -1,0 +1,17 @@
+[project]
+name = "pek-engine"
+version = "0.1.0"
+description = "Dispensary product normalization + PEK/MCP price comparison engine"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+# Live scraping: browser-TLS impersonation to pass anti-bot + HTML parsing.
+# Without these the scraper falls back to urllib (works for open JSON APIs only).
+scrape = ["curl_cffi>=0.6", "beautifulsoup4>=4.12"]
+# Postgres sink for harvested listings.
+db = ["sqlalchemy>=2.0", "psycopg2-binary>=2.9"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
