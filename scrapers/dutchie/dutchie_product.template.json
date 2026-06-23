@@ -1,0 +1,36 @@
+{
+  "_comment": "Empty normalized Dutchie product record. ONE object per purchasable variant (weight/size option) — products with multiple weights/sizes produce multiple records, all sharing the same product_id. De-dupe products on product_id; a (product_id, variant_option) pair is unique. Copy this shape as your scraper's output target / DB row.",
+
+  "schema_version": "1.0",
+
+  "dispensary_name": null,
+  "dispensary_id": null,
+  "dispensary_url": null,
+
+  "product_id": null,
+  "product_name": null,
+  "brand": null,
+  "category": null,
+  "subcategory": null,
+  "strain_type": null,
+
+  "thc_level": null,
+  "cbd_level": null,
+
+  "variant_option": null,
+  "numeric_price": null,
+  "display_price": null,
+  "quantity_available": null,
+  "in_stock": null,
+
+  "special": null,
+  "status": null,
+
+  "description": null,
+  "image_url": null,
+  "product_url": null,
+
+  "scraped_at": null,
+
+  "raw": null
+}

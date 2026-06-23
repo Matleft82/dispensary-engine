@@ -1,0 +1,3 @@
+# Dutchie scraper dependencies
+curl_cffi>=0.7.0      # Chrome TLS/JA3 impersonation to pass Cloudflare
+jsonschema>=4.0.0     # optional: only needed for `python dutchie_scraper.py --validate`

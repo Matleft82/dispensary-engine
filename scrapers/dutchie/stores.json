@@ -1,0 +1,234 @@
+[
+  {
+    "name": "Canterra",
+    "store_id": "64d2683c75332e0009f274f1",
+    "address": "451 Elmwood Ave #105, Buffalo, NY 14222",
+    "website": "https://canterra.co/",
+    "menu_url": "https://dutchie.com/embedded-menu/64d2683c75332e0009f274f1",
+    "specials_url": "https://dutchie.com/embedded-menu/64d2683c75332e0009f274f1/specials"
+  },
+  {
+    "name": "Peace, Love, & Bud",
+    "store_id": "66229844b170928ed0901c3c",
+    "address": "320 S Transit St, Lockport, NY 14094",
+    "website": "https://www.plbud.com/",
+    "menu_url": "https://dutchie.com/embedded-menu/66229844b170928ed0901c3c",
+    "specials_url": "https://dutchie.com/embedded-menu/66229844b170928ed0901c3c/specials"
+  },
+  {
+    "name": "Upstate Exotics",
+    "store_id": "65e79227ac022d00098e5c8b",
+    "address": "9200 Niagara Falls Blvd, Niagara Falls, NY 14304",
+    "website": "https://upstateexotics716.com/",
+    "menu_url": "https://dutchie.com/embedded-menu/65e79227ac022d00098e5c8b",
+    "specials_url": "https://dutchie.com/embedded-menu/65e79227ac022d00098e5c8b/specials"
+  },
+  {
+    "name": "Treehead Culture",
+    "store_id": "64e5132f421f8100098aed54",
+    "address": "665 N French Rd, Buffalo, NY 14228",
+    "website": "https://treeheadculture.com/",
+    "menu_url": "https://dutchie.com/embedded-menu/64e5132f421f8100098aed54",
+    "specials_url": "https://dutchie.com/embedded-menu/64e5132f421f8100098aed54/specials"
+  },
+  {
+    "name": "The Smoking Buffalo",
+    "store_id": "66fd45a7c7c2b14ad57c564f",
+    "address": "2540 George Urban Blvd, Depew, NY 14043",
+    "website": "https://www.thesmokingbuffalodispensary.com/",
+    "menu_url": "https://dutchie.com/embedded-menu/66fd45a7c7c2b14ad57c564f",
+    "specials_url": "https://dutchie.com/embedded-menu/66fd45a7c7c2b14ad57c564f/specials"
+  },
+  {
+    "name": "The Phinest Buds",
+    "store_id": "66b68302e896e8056b1bced2",
+    "address": "576 Dick Rd suite 10a, Depew, NY 14043",
+    "website": "https://thephinestbuds.com/",
+    "menu_url": "https://dutchie.com/embedded-menu/66b68302e896e8056b1bced2",
+    "specials_url": "https://dutchie.com/embedded-menu/66b68302e896e8056b1bced2/specials"
+  },
+  {
+    "name": "The Kokoro Way",
+    "store_id": "6835cc2b6ef4f620b1ab5e7d",
+    "address": "2454 Elmwood Ave, Kenmore, NY 14217",
+    "website": "https://thekokoroway.com/",
+    "menu_url": "https://dutchie.com/embedded-menu/6835cc2b6ef4f620b1ab5e7d",
+    "specials_url": "https://dutchie.com/embedded-menu/6835cc2b6ef4f620b1ab5e7d/specials"
+  },
+  {
+    "name": "Star Buds",
+    "store_id": "6595855102771e0009439283",
+    "address": "396 Kenmore Ave, Buffalo, NY 14223",
+    "website": "https://shop.starbuds.us/stores/buffalo-dispensary/",
+    "menu_url": "https://dutchie.com/embedded-menu/6595855102771e0009439283",
+    "specials_url": "https://dutchie.com/embedded-menu/6595855102771e0009439283/specials"
+  },
+  {
+    "name": "Secret Garden 716",
+    "store_id": "660b3567aa62f1639856faa6",
+    "address": "1363 Delaware Ave, Buffalo, NY 14209",
+    "website": "https://www.secretgarden716.com/",
+    "menu_url": "https://dutchie.com/embedded-menu/660b3567aa62f1639856faa6",
+    "specials_url": "https://dutchie.com/embedded-menu/660b3567aa62f1639856faa6/specials"
+  },
+  {
+    "name": "Public Flower",
+    "store_id": "6569f41c44db8e0009709faf",
+    "address": "232 Allen St, Buffalo, NY 14201",
+    "website": "https://publicflower.co/",
+    "menu_url": "https://dutchie.com/embedded-menu/6569f41c44db8e0009709faf",
+    "specials_url": "https://dutchie.com/embedded-menu/6569f41c44db8e0009709faf/specials"
+  },
+  {
+    "name": "Nativa Cannabis",
+    "store_id": "63b8482c60e0950086ff19ea",
+    "address": "765 Niagara St, Niagara Falls, NY 14303",
+    "website": "https://www.nativacannabis.com/",
+    "menu_url": "https://dutchie.com/embedded-menu/63b8482c60e0950086ff19ea",
+    "specials_url": "https://dutchie.com/embedded-menu/63b8482c60e0950086ff19ea/specials"
+  },
+  {
+    "name": "Mary Janes",
+    "store_id": "6579bbae6e08400009da73cf",
+    "address": "2179 Sheridan Drive, Tonawanda, NY 14223",
+    "website": "https://maryjaneswny.com/",
+    "menu_url": "https://dutchie.com/embedded-menu/6579bbae6e08400009da73cf",
+    "specials_url": "https://dutchie.com/embedded-menu/6579bbae6e08400009da73cf/specials"
+  },
+  {
+    "name": "Mammoth Cannabis",
+    "store_id": "6674575e7531e65c8d1c3f4a",
+    "address": "212 Ohio St Suite 2, Buffalo, NY 14204",
+    "website": "https://mammothcanna.com/",
+    "menu_url": "https://dutchie.com/embedded-menu/6674575e7531e65c8d1c3f4a",
+    "specials_url": "https://dutchie.com/embedded-menu/6674575e7531e65c8d1c3f4a/specials"
+  },
+  {
+    "name": "Love Nug",
+    "store_id": "67b4b2987a5d0e272f88f5fa",
+    "address": "3176 Niagara Falls Blvd, North Tonawanda, NY",
+    "website": "https://shoplovenug.com/",
+    "menu_url": "https://dutchie.com/embedded-menu/67b4b2987a5d0e272f88f5fa",
+    "specials_url": "https://dutchie.com/embedded-menu/67b4b2987a5d0e272f88f5fa/specials"
+  },
+  {
+    "name": "Leaf Plug",
+    "store_id": "662ffb05e1e7c3b5d741e4d0",
+    "address": "3341 Sheridan Dr, Buffalo, NY 14226",
+    "website": "https://leafplug.com/",
+    "menu_url": "https://dutchie.com/embedded-menu/662ffb05e1e7c3b5d741e4d0",
+    "specials_url": "https://dutchie.com/embedded-menu/662ffb05e1e7c3b5d741e4d0/specials"
+  },
+  {
+    "name": "King of Budz",
+    "store_id": "67a163c36974913902673fdc",
+    "address": "2200 Walden Ave, Buffalo, NY 14225",
+    "website": "https://kingofbudz.com/",
+    "menu_url": "https://dutchie.com/embedded-menu/67a163c36974913902673fdc",
+    "specials_url": "https://dutchie.com/embedded-menu/67a163c36974913902673fdc/specials"
+  },
+  {
+    "name": "Jupiter Cafe",
+    "store_id": "6595a53e34343d00092a046f",
+    "address": "172 N Union St, Olean, NY 14760",
+    "website": "https://jupitercafe.store/",
+    "menu_url": "https://dutchie.com/embedded-menu/6595a53e34343d00092a046f",
+    "specials_url": "https://dutchie.com/embedded-menu/6595a53e34343d00092a046f/specials"
+  },
+  {
+    "name": "High Tide",
+    "store_id": "65a6d8a1539ea70009148288",
+    "address": "1829 Como Park Blvd, Lancaster, NY 14086",
+    "website": "https://www.hightide716.com/",
+    "menu_url": "https://dutchie.com/embedded-menu/65a6d8a1539ea70009148288",
+    "specials_url": "https://dutchie.com/embedded-menu/65a6d8a1539ea70009148288/specials"
+  },
+  {
+    "name": "High Cloudz",
+    "store_id": "680f91f53454d794a2625f8b",
+    "address": "2675 Main St, Buffalo, NY 14214",
+    "website": "https://highcloudzcannabis.com/",
+    "menu_url": "https://dutchie.com/embedded-menu/680f91f53454d794a2625f8b",
+    "specials_url": "https://dutchie.com/embedded-menu/680f91f53454d794a2625f8b/specials"
+  },
+  {
+    "name": "Herbalwai",
+    "store_id": "6595a01eb7704a00093afd02",
+    "address": "6970 Transit Rd Suite 100, Buffalo, NY 14221",
+    "website": "https://herbalwai.com/",
+    "menu_url": "https://dutchie.com/embedded-menu/6595a01eb7704a00093afd02",
+    "specials_url": "https://dutchie.com/embedded-menu/6595a01eb7704a00093afd02/specials"
+  },
+  {
+    "name": "Herbal IQ",
+    "store_id": "64878016c9f11d0016c78f1a",
+    "address": "6300 Transit Rd, Depew, NY 14043",
+    "website": "https://herbaliq.org/",
+    "menu_url": "https://dutchie.com/embedded-menu/64878016c9f11d0016c78f1a",
+    "specials_url": "https://dutchie.com/embedded-menu/64878016c9f11d0016c78f1a/specials"
+  },
+  {
+    "name": "716 Cannabis",
+    "store_id": "64c8f9e37f0cc30009df1a56",
+    "address": "5161 Camp Rd, Hamburg NY, 14075",
+    "website": "https://716cannabisllc.com/",
+    "menu_url": "https://dutchie.com/embedded-menu/64c8f9e37f0cc30009df1a56",
+    "specials_url": "https://dutchie.com/embedded-menu/64c8f9e37f0cc30009df1a56/specials"
+  },
+  {
+    "name": "Best Budz",
+    "store_id": "67d863484420ce5c8c9897fd",
+    "address": "146 Virginia St, Buffalo, NY 14201",
+    "website": "https://bestbudz716.com/",
+    "menu_url": "https://dutchie.com/embedded-menu/67d863484420ce5c8c9897fd",
+    "specials_url": "https://dutchie.com/embedded-menu/67d863484420ce5c8c9897fd/specials"
+  },
+  {
+    "name": "Buffalo Kind",
+    "store_id": "6644f7702fde4d76a2319c4e",
+    "address": "640 Main St, East Aurora, NY 14052",
+    "website": "https://buffalokind.com/",
+    "menu_url": "https://dutchie.com/embedded-menu/6644f7702fde4d76a2319c4e",
+    "specials_url": "https://dutchie.com/embedded-menu/6644f7702fde4d76a2319c4e/specials"
+  },
+  {
+    "name": "Dream Daze",
+    "store_id": "66c62af455af03daeb800b12",
+    "address": "5100 Transit Rd, Depew, NY 14043",
+    "website": "https://thedreamdaze.com/",
+    "menu_url": "https://dutchie.com/embedded-menu/66c62af455af03daeb800b12",
+    "specials_url": "https://dutchie.com/embedded-menu/66c62af455af03daeb800b12/specials"
+  },
+  {
+    "name": "Enchanted Mtns",
+    "store_id": "664553d9fd37589e81286544",
+    "address": "24 Washington St, Ellicottville, NY 14731",
+    "website": "https://enchantedmountainscannaco.com/",
+    "menu_url": "https://dutchie.com/embedded-menu/664553d9fd37589e81286544",
+    "specials_url": "https://dutchie.com/embedded-menu/664553d9fd37589e81286544/specials"
+  },
+  {
+    "name": "Happy Times Cannabis (Buffalo)",
+    "store_id": "67196f2c8c7ea2c66ca086b5",
+    "address": "3807 Harlem Rd, Buffalo, NY",
+    "website": "https://happytimescannabis.com/",
+    "menu_url": "https://dutchie.com/embedded-menu/67196f2c8c7ea2c66ca086b5",
+    "specials_url": "https://dutchie.com/embedded-menu/67196f2c8c7ea2c66ca086b5/specials"
+  },
+  {
+    "name": "Happy Times Cannabis (Cheektowaga)",
+    "store_id": "663e8c38b0acd18a8b9baa51",
+    "address": "2760 Union Rd, Cheektowaga, NY 14227",
+    "website": "https://happytimescannabis.com/",
+    "menu_url": "https://dutchie.com/embedded-menu/663e8c38b0acd18a8b9baa51",
+    "specials_url": "https://dutchie.com/embedded-menu/663e8c38b0acd18a8b9baa51/specials"
+  },
+  {
+    "name": "Happy Times Cannabis (Niagara Falls)",
+    "store_id": "67e1a51029e4d49c31862c05",
+    "address": "7560 Niagara Falls Blvd, Niagara Falls, NY",
+    "website": "https://happytimescannabis.com/",
+    "menu_url": "https://dutchie.com/embedded-menu/67e1a51029e4d49c31862c05",
+    "specials_url": "https://dutchie.com/embedded-menu/67e1a51029e4d49c31862c05/specials"
+  }
+]

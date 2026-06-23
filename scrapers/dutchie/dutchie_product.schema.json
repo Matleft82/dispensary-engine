@@ -1,0 +1,117 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://example.com/schemas/dutchie_product.schema.json",
+  "title": "Dutchie Consumer Menu Product",
+  "description": "Schema for a single product object returned under data.filteredProducts.products[] by Dutchie's consumer GraphQL API (https://dutchie.com/graphql, operation FilteredProducts). Field set derived from Dutchie's documented/observed embedded-menu responses. additionalProperties is true: the persisted-query path returns Dutchie's full canonical product object (dozens of fields that vary by store/POS), so only the load-bearing fields are typed here. Nullable fields use type arrays e.g. [\"string\",\"null\"].",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["id"],
+  "properties": {
+    "id": { "type": "string", "description": "Stable product id (24-char hex). Use as the de-duplication key." },
+    "_id": { "type": ["string", "null"], "description": "Sometimes present; same value as id." },
+    "cName": { "type": ["string", "null"], "description": "URL slug for the product page." },
+    "DispensaryID": { "type": ["string", "null"] },
+
+    "Name": { "type": ["string", "null"], "description": "Display name (note the capital N)." },
+    "Description": { "type": ["string", "null"], "description": "Marketing copy; may contain HTML." },
+    "brand": {
+      "type": ["string", "object", "null"],
+      "description": "Polymorphic: sometimes a nested object {id,name,...}, sometimes a string, sometimes null. POSMetaData.canonicalBrandName is a reliable fallback.",
+      "properties": {
+        "id": { "type": ["string", "null"] },
+        "name": { "type": ["string", "null"] },
+        "imageUrl": { "type": ["string", "null"], "format": "uri" },
+        "description": { "type": ["string", "null"] }
+      }
+    },
+    "brandName": { "type": ["string", "null"], "description": "Flat brand name on some menus." },
+    "type": { "type": ["string", "null"], "description": "Top-level category, e.g. Flower, Pre-Rolls, Vaporizers, Edible, Concentrate, Tincture, Topicals, Accessories." },
+    "subcategory": { "type": ["string", "null"], "description": "e.g. disposables, pre-ground, gummies." },
+    "strainType": {
+      "type": ["string", "null"],
+      "description": "Indica / Sativa / Hybrid / Indica-Hybrid / Sativa-Hybrid / null.",
+      "enum": ["Indica", "Sativa", "Hybrid", "Indica-Hybrid", "Sativa-Hybrid", "High CBD", "Not Applicable", "", null]
+    },
+    "Status": { "type": ["string", "null"], "description": "e.g. Active.", "enum": ["Active", "Inactive", "Hidden", null] },
+
+    "THC": {
+      "type": ["object", "number", "string", "null"],
+      "description": "THC potency. Often an object {range:[min,max], unit}, sometimes a number/string.",
+      "properties": {
+        "range": { "type": ["array", "null"], "items": { "type": ["number", "string"] } },
+        "unit": { "type": ["string", "null"], "description": "e.g. PERCENTAGE, MILLIGRAMS." }
+      }
+    },
+    "CBD": {
+      "type": ["object", "number", "string", "null"],
+      "description": "CBD potency. Same shape as THC.",
+      "properties": {
+        "range": { "type": ["array", "null"], "items": { "type": ["number", "string"] } },
+        "unit": { "type": ["string", "null"] }
+      }
+    },
+    "THCContent": { "type": ["object", "number", "string", "null"] },
+    "CBDContent": { "type": ["object", "number", "string", "null"] },
+    "cannabinoidsV2": { "type": ["array", "null"], "items": { "type": "object" }, "description": "Per-cannabinoid breakdown when includeCannabinoids=true." },
+    "effects": { "type": ["array", "null"], "items": { "type": ["string", "object"] } },
+    "terpenes": { "type": ["array", "null"], "items": { "type": ["string", "object"] } },
+    "measurements": { "type": ["object", "null"] },
+
+    "Options": {
+      "type": ["array", "null"],
+      "items": { "type": ["string", "number"] },
+      "description": "Weight/size option labels (e.g. [\"1g\",\"3.5g\",\"7g\"]). Parallel-indexed with Prices."
+    },
+    "Prices": {
+      "type": ["array", "null"],
+      "items": { "type": ["number", "null"] },
+      "description": "Menu price per Options entry (same index)."
+    },
+    "recPrices": { "type": ["array", "null"], "items": { "type": ["number", "null"] } },
+    "medPrices": { "type": ["array", "null"], "items": { "type": ["number", "null"] } },
+    "recSpecialPrices": { "type": ["array", "null"], "items": { "type": ["number", "null"] } },
+    "medSpecialPrices": { "type": ["array", "null"], "items": { "type": ["number", "null"] } },
+    "wholesalePrices": { "type": ["array", "null"], "items": { "type": ["number", "null"] } },
+
+    "special": { "type": ["boolean", "null"], "description": "True when the product is on an active special." },
+    "specialData": { "type": ["object", "array", "null"], "description": "Promo/deal details when on special." },
+    "comingSoon": { "type": ["boolean", "null"] },
+    "featured": { "type": ["object", "boolean", "null"] },
+
+    "Image": { "type": ["string", "null"], "format": "uri", "description": "Primary image URL (images.dutchie.com)." },
+    "images": { "type": ["array", "null"], "items": { "type": ["string", "object"] } },
+
+    "POSMetaData": {
+      "type": ["object", "null"],
+      "additionalProperties": true,
+      "description": "Bridge to the store's POS. Carries canonical naming and per-SKU (per-variant) inventory under children[].",
+      "properties": {
+        "canonicalID": { "type": ["string", "null"] },
+        "canonicalName": { "type": ["string", "null"] },
+        "canonicalBrandName": { "type": ["string", "null"], "description": "Reliable brand fallback." },
+        "canonicalCategoryName": { "type": ["string", "null"] },
+        "children": {
+          "type": ["array", "null"],
+          "description": "One entry per purchasable variant (weight/size SKU).",
+          "items": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "option": { "type": ["string", "null"], "description": "Variant label, e.g. '3.5g', '1g', '20 Pack'." },
+              "quantity": { "type": ["number", "null"] },
+              "quantityAvailable": { "type": ["number", "null"], "description": "Live on-hand units for this SKU." },
+              "price": { "type": ["number", "null"] },
+              "recPrice": { "type": ["number", "null"] },
+              "medPrice": { "type": ["number", "null"] },
+              "standardPrice": { "type": ["number", "null"] },
+              "kioskPrice": { "type": ["number", "null"] },
+              "serializationData": { "type": ["object", "array", "null"] }
+            }
+          }
+        }
+      }
+    },
+
+    "queryInfo": { "type": ["object", "null"], "description": "Present at the filteredProducts level, not per product; included for completeness." }
+  }
+}
