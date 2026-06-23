@@ -1,0 +1,55 @@
+{
+  "_comment": "ILLUSTRATIVE sample of one product object from data.filteredProducts.products[]. Reconstructed from Dutchie's documented/observed embedded-menu responses to show field shapes (not captured live from this environment — Dutchie blocks datacenter IPs). Values are representative; field NAMES and SHAPES match the API. Validate real captures with: python dutchie_scraper.py --max-products 5 --validate",
+  "id": "6603f1a2c9d4b80012ab34cd",
+  "cName": "blue-dream-3-5g",
+  "Name": "Blue Dream 3.5g",
+  "Description": "A sativa-dominant hybrid delivering balanced, full-body relaxation with gentle cerebral invigoration.",
+  "brand": {
+    "id": "5fd9c1b2a1e4f30011aa22bb",
+    "name": "Sample Farms"
+  },
+  "brandName": "Sample Farms",
+  "type": "Flower",
+  "subcategory": "pre-ground",
+  "strainType": "Sativa-Hybrid",
+  "Status": "Active",
+  "THC": {
+    "range": [22.4, 22.4],
+    "unit": "PERCENTAGE"
+  },
+  "CBD": {
+    "range": [0.1, 0.1],
+    "unit": "PERCENTAGE"
+  },
+  "effects": ["Relaxed", "Happy", "Euphoric"],
+  "Options": ["3.5g", "7g"],
+  "Prices": [40, 75],
+  "recPrices": [40, 75],
+  "recSpecialPrices": [35, 70],
+  "special": true,
+  "Image": "https://images.dutchie.com/sample/blue-dream.png",
+  "images": ["https://images.dutchie.com/sample/blue-dream.png"],
+  "POSMetaData": {
+    "canonicalID": "canonical-blue-dream",
+    "canonicalBrandName": "Sample Farms",
+    "canonicalCategoryName": "Flower",
+    "children": [
+      {
+        "option": "3.5g",
+        "quantity": 18,
+        "quantityAvailable": 18,
+        "price": 40,
+        "recPrice": 40,
+        "standardPrice": 40
+      },
+      {
+        "option": "7g",
+        "quantity": 6,
+        "quantityAvailable": 6,
+        "price": 75,
+        "recPrice": 75,
+        "standardPrice": 75
+      }
+    ]
+  }
+}
