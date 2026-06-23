@@ -1,0 +1,72 @@
+{
+  "_comment": "Empty normalized AIQ/Dispense product record. One object per unique product (de-duped on product_id). Copy this shape as your scraper's output target / DB row.",
+
+  "dispensary_name": null,
+  "venue_id": null,
+  "product_id": null,
+  "sku": null,
+  "slug": null,
+  "product_url": null,
+  "pos_product_id": null,
+
+  "name": null,
+  "description": null,
+  "brand": null,
+  "product_category": null,
+  "sub_type": null,
+  "cannabis_type": null,
+  "cannabis_strain": null,
+  "cannabis_compliance": null,
+  "tags": [],
+
+  "weight": null,
+  "weight_unit": null,
+  "weight_in_grams": null,
+  "weight_formatted": null,
+  "size": null,
+
+  "price": null,
+  "price_with_discounts": null,
+  "price_gross": null,
+  "price_net": null,
+  "price_type": null,
+  "on_sale": null,
+  "discount_value_final": null,
+  "discount_amount_final": null,
+  "discount_type": null,
+
+  "quantity": null,
+  "quantity_total": null,
+  "quantity_sold": null,
+  "quantity_threshold": null,
+  "enable": null,
+  "new": null,
+  "featured": null,
+
+  "thc": null,
+  "thc_unit": null,
+  "thca": null,
+  "cbd": null,
+  "cbd_unit": null,
+  "cbda": null,
+  "cbg": null,
+  "cbn": null,
+  "potency": null,
+
+  "effects": [],
+  "terpenes": [],
+  "effect_onset": null,
+  "effect_duration": null,
+
+  "image": null,
+  "images": [],
+
+  "review_total": null,
+  "review_average_rating": null,
+
+  "created": null,
+  "modified": null,
+  "scraped_at": null,
+
+  "raw": null
+}
