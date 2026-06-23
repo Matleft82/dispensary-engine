@@ -1,0 +1,150 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://example.com/schemas/aiq_product.schema.json",
+  "title": "AIQ / Dispense Product",
+  "description": "Schema for a single product as returned by api.dispenseapp.com /v1/venues/{venue_id}/product-categories/{category_id}/products. Verified against 82-J, Innocence, and Mrs. Green's menus on 2026-06-23. Nullable fields use type arrays e.g. [\"string\",\"null\"].",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["id", "name"],
+  "properties": {
+    "id": { "type": "string", "description": "Stable product id. Use as the de-duplication key." },
+    "_id": { "type": "string", "description": "Same value as id." },
+    "deleted": { "type": "boolean" },
+    "sku": { "type": ["string", "null"] },
+    "slug": { "type": ["string", "null"] },
+    "productUrl": { "type": ["string", "null"], "format": "uri" },
+    "posProductId": { "type": ["string", "null"] },
+    "venue": { "type": "string" },
+    "organization": { "type": "string" },
+
+    "name": { "type": "string" },
+    "description": { "type": ["string", "null"], "description": "May contain HTML." },
+    "seoDescription": { "type": ["string", "null"] },
+    "brand": {
+      "type": ["string", "object", "null"],
+      "description": "Sometimes a plain string, sometimes a nested brand object, sometimes null. Normalize to a name string.",
+      "properties": {
+        "id": { "type": ["string", "null"] },
+        "name": { "type": ["string", "null"] },
+        "description": { "type": ["string", "null"] },
+        "logo": { "type": ["string", "null"], "format": "uri" },
+        "website": { "type": ["string", "null"], "format": "uri" }
+      }
+    },
+    "productCategory": { "type": ["string", "null"], "description": "Category id this row came from." },
+    "productCategoryName": { "type": ["string", "null"] },
+    "productCategoryIconImage": { "type": ["string", "null"], "format": "uri" },
+    "subType": { "type": ["string", "null"] },
+    "cannabisType": {
+      "type": ["string", "null"],
+      "enum": ["SATIVA", "INDICA", "HYBRID", "HYBRID_SATIVA", "HYBRID_INDICA", "CBD", "NA", null]
+    },
+    "cannabisStrain": { "type": ["string", "null"] },
+    "cannabisComplianceType": {
+      "type": ["string", "null"],
+      "description": "Regulatory class, e.g. FLOWER, EDIBLES, CONCENTRATE, VAPORIZER, PRE_ROLL, TINCTURE, TOPICAL, CBD, ACCESSORIES."
+    },
+    "tags": { "type": ["array", "null"], "items": { "type": "string" } },
+
+    "weight": { "type": ["number", "null"] },
+    "weightUnit": { "type": ["string", "null"], "description": "e.g. GRAMS, MG." },
+    "weightInGrams": { "type": ["number", "null"] },
+    "weightFormatted": { "type": ["string", "null"] },
+    "size": { "type": ["string", "number", "null"] },
+    "flowerEquivalentInGrams": { "type": ["number", "null"] },
+
+    "price": { "type": ["number", "null"], "description": "Menu price shown to the customer." },
+    "priceWithDiscounts": { "type": ["number", "null"], "description": "Final price after active discounts." },
+    "priceGross": { "type": ["number", "null"], "description": "Tax-inclusive (out-the-door)." },
+    "priceNet": { "type": ["number", "null"] },
+    "priceType": { "type": ["string", "null"], "description": "e.g. REGULAR." },
+    "discountValue": { "type": ["number", "null"] },
+    "discountValueFinal": { "type": ["number", "null"] },
+    "discountAmountFinal": { "type": ["number", "null"] },
+    "discountType": { "type": ["string", "null"], "enum": ["PERCENT", "AMOUNT", null] },
+    "discountTypeFinal": { "type": ["string", "null"], "enum": ["PERCENT", "AMOUNT", null] },
+    "discounts": { "type": ["array", "null"], "items": { "type": "object" } },
+
+    "quantity": { "type": ["number", "null"] },
+    "quantityTotal": { "type": ["number", "null"] },
+    "quantitySold": { "type": ["number", "null"] },
+    "quantityThreshold": { "type": ["number", "null"] },
+    "totalSold": { "type": ["number", "null"] },
+    "totalQuantitySold": { "type": ["number", "null"] },
+    "enable": { "type": ["boolean", "null"] },
+    "new": { "type": ["boolean", "null"] },
+    "featured": { "type": ["boolean", "null"] },
+    "productOrderType": { "type": ["string", "null"], "description": "e.g. ORDERING_ALLOWED." },
+
+    "labs": {
+      "type": ["object", "null"],
+      "additionalProperties": true,
+      "description": "Lab/potency results. Each analyte has a value plus a sibling <name>ContentUnit (usually '%').",
+      "properties": {
+        "potency": { "type": ["string", "null"], "description": "e.g. MILD, MODERATE, STRONG." },
+        "thc": { "type": ["number", "null"] },
+        "thcMax": { "type": ["number", "null"] },
+        "thcContentUnit": { "type": ["string", "null"] },
+        "thcA": { "type": ["number", "null"] },
+        "thcAContentUnit": { "type": ["string", "null"] },
+        "cbd": { "type": ["number", "null"] },
+        "cbdMax": { "type": ["number", "null"] },
+        "cbdContentUnit": { "type": ["string", "null"] },
+        "cbdA": { "type": ["number", "null"] },
+        "cbdAContentUnit": { "type": ["string", "null"] },
+        "cbg": { "type": ["number", "null"] },
+        "cbgContentUnit": { "type": ["string", "null"] },
+        "cbn": { "type": ["number", "null"] },
+        "cbnContentUnit": { "type": ["string", "null"] },
+        "terpenes": { "type": ["array", "null"], "items": { "type": ["string", "object"] } },
+        "limonene": { "type": ["number", "null"] },
+        "linalool": { "type": ["number", "null"] },
+        "betaMyrcene": { "type": ["number", "null"] },
+        "betaCaryophyllene": { "type": ["number", "null"] },
+        "betaPinene": { "type": ["number", "null"] },
+        "alphaPinene": { "type": ["number", "null"] },
+        "humulene": { "type": ["number", "null"] },
+        "ocimene": { "type": ["number", "null"] },
+        "terpinolene": { "type": ["number", "null"] }
+      }
+    },
+
+    "effects": { "type": ["array", "null"], "items": { "type": "string" } },
+    "terpenes": { "type": ["array", "null"], "items": { "type": ["string", "object"] } },
+    "effectOnset": { "type": ["string", "null"] },
+    "effectDuration": { "type": ["string", "null"] },
+
+    "image": { "type": ["string", "null"], "format": "uri" },
+    "images": {
+      "type": ["array", "null"],
+      "items": {
+        "type": "object",
+        "properties": {
+          "fileUrl": { "type": ["string", "null"], "format": "uri" },
+          "originalFileUrl": { "type": ["string", "null"], "format": "uri" },
+          "order": { "type": ["number", "null"] }
+        }
+      }
+    },
+
+    "variants": { "type": ["array", "null"], "items": { "type": "object" }, "description": "Per-weight/size variants; empty on these NY menus (each tier is its own product) but present in the schema." },
+    "modifierGroups": { "type": ["array", "null"], "items": { "type": "object" } },
+
+    "reviewStats": {
+      "type": ["object", "null"],
+      "properties": {
+        "total": { "type": ["number", "null"] },
+        "averageRating": { "type": ["number", "null"] }
+      }
+    },
+
+    "created": { "type": ["string", "null"], "format": "date-time" },
+    "modified": { "type": ["string", "null"], "format": "date-time" },
+
+    "posLastSyncData": { "type": ["string", "object", "null"], "description": "Raw POS sync blob; often a JSON STRING with dotted keys like 'labs.thc'. Use as a fallback for lab values." },
+    "cova": { "type": ["object", "null"] },
+    "fourleaf": { "type": ["object", "null"] },
+    "flowhubMaui": { "type": ["object", "null"] },
+    "search": { "type": ["object", "null"] }
+  }
+}
